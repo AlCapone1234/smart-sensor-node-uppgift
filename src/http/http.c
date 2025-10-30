@@ -27,8 +27,6 @@ char* http_type_to_str(Http_Type type)
     }
 }
 
-/*\"device\":\"UUID\",\"time\":\"<time>\",\"temperature\":\"<temperature>C\"*/
-
 char* http_create_request(Http_Type type, const char* data, const char* api_gateway)
 {
     char* type_identifier = http_type_to_str(type);

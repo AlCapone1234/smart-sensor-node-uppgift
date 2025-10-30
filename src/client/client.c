@@ -23,8 +23,6 @@ void client_initialize()
     }
 
     struct sockaddr_in serverAddress = {0};
-
-    /*As I am using C89, getaddrinfo is not available*/
     struct hostent* server;
 
     server = gethostbyname("www.httpbin.org");
@@ -35,7 +33,6 @@ void client_initialize()
     }
 
     serverAddress.sin_family = AF_INET;
-    /*serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");*/
     serverAddress.sin_port = htons(80);
     memcpy(&serverAddress.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
 
@@ -47,6 +44,10 @@ void client_initialize()
     }
 
     char* message = http_create_request(POST, "{\"device\":\"UUID\",\"time\":\"<time>\",\"temperature\":\"<temperature>C\"}", "post");
+    if (message == NULL)
+    {
+        return;
+    }
 
     if (send(fd, message, strlen(message), 0) < 0)
     {
@@ -56,7 +57,6 @@ void client_initialize()
     }
 
     char* server_read_data = tcp_read(fd, 1024);
-
     if (server_read_data == NULL)
     {
         printf("TCP_READ FAILED!\n");
