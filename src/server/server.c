@@ -2,7 +2,9 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "../tcp/tcp.h"
 #include "server.h"
 
 void server_initialize()
@@ -43,25 +45,10 @@ void server_initialize()
         return;
     }
 
-    char buffer[1024];
-    ssize_t totalBytesRead = 0;
-    while (1)
-    {
-        ssize_t bytesRead = recv(clientSocket, &buffer[totalBytesRead], 1024, 0);
+    char* message = tcp_read(clientSocket, 1024);
 
-        if (bytesRead < 0)
-        {
-            break;
-        }
+    printf("%s\n", message);
 
-        if (bytesRead == 0)
-        {
-            break;
-        }
-
-        totalBytesRead += bytesRead;
-    }
-    buffer[totalBytesRead] = '\0';
-
-    printf("%s\n", buffer);
+    free(message);
+    message = NULL;
 }

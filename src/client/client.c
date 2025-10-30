@@ -29,7 +29,7 @@ void client_initialize()
         return;
     }
 
-    char* message = "Hello On The Server";
+    char* message = "Hello On The Server TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST";
 
     if (send(fd, message, strlen(message), 0) < 0)
     {
