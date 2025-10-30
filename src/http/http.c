@@ -36,6 +36,10 @@ char* http_create_request(Http_Type type, const char* data, const char* api_gate
     size_t size = dataLength + strlen(type_identifier) + strlen(http_message_template) + strlen(api_gateway) - 3;
 
     char* buffer = (char*)malloc(size * sizeof(char)); 
+
+    if (buffer == NULL)
+        return NULL;
+
     sprintf(buffer, http_message_template, type_identifier, api_gateway, dataLength, data);
 
     return buffer;
