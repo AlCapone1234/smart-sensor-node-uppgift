@@ -56,5 +56,4 @@ dkms.conf
 
 # other files
 .vscode/
-./client
-./server
+./main

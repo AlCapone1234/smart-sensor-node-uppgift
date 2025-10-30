@@ -5,7 +5,7 @@
 /* Only POST is available */
 typedef enum
 {
-    POST,
+    POST
 }Http_Type;
 
 

@@ -10,36 +10,43 @@
 
 #include "../tcp/tcp.h"
 #include "../http/http.h"
-
 #include "../server/server.h"
+#include "client.h"
 
-void client_initialize()
+void client_work(Client* client, ResponseCallback callback);
+
+
+void client_initialize(ResponseCallback response)
 {
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd == -1)
+    Client client = {0};
+
+    client.fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (client.fd == -1)
     {
         perror("socket");
         return;
     }
 
-    struct sockaddr_in serverAddress = {0};
-    struct hostent* server;
-
-    server = gethostbyname("www.httpbin.org");
-    if (server == NULL)
+    client.server = gethostbyname("www.httpbin.org");
+    if (client.server == NULL)
     {
         printf("Failed to get hostname");
         return;
     }
 
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(80);
-    memcpy(&serverAddress.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
+    client.serverAddress.sin_family = AF_INET;
+    client.serverAddress.sin_port = htons(80);
+    memcpy(&client.serverAddress.sin_addr.s_addr, client.server->h_addr_list[0], client.server->h_length);
 
-    if (connect(fd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
+    client_work(&client, response);
+}
+
+void client_work(Client* client, ResponseCallback callback)
+{
+    if (connect(client->fd, (struct sockaddr*)&client->serverAddress, sizeof(client->serverAddress)) == -1)
     {
         perror("connect");
-        close(fd);
+        close(client->fd);
         return;
     }
 
@@ -49,26 +56,29 @@ void client_initialize()
         return;
     }
 
-    if (send(fd, message, strlen(message), 0) < 0)
+    if (send(client->fd, message, strlen(message), 0) < 0)
     {
         perror("Send failed");
-        close(fd);
+        close(client->fd);
         return;
     }
 
-    char* server_read_data = tcp_read(fd, 1024);
+    char* server_read_data = tcp_read(client->fd, 1024);
     if (server_read_data == NULL)
     {
         printf("TCP_READ FAILED!\n");
-        close(fd);
+        close(client->fd);
         return;
     }
 
-    printf("%s\n", server_read_data);
+    if (callback)
+    {
+        callback(server_read_data);   
+    }
 
     free(server_read_data);
     free(message);
     server_read_data = NULL;
     message = NULL;
-    close(fd);
+    close(client->fd);
 }
