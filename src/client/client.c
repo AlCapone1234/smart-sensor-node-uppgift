@@ -7,7 +7,9 @@
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "../tcp/tcp.h"
+#include "../http/http.h"
 
 #include "../server/server.h"
 
@@ -44,14 +46,7 @@ void client_initialize()
         return;
     }
 
-    char *message = 
-        "POST /post HTTP/1.1\r\n"
-        "Host: httpbin.org\r\n"
-        "Content-Type: application/json\r\n"
-        "Content-Length: 62\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-        "{\"device\":\"UUID\",\"time\":\"<time>\",\"temperature\":\"<temperature>C\"}";
+    char* message = http_create_request(POST, "{\"device\":\"UUID\",\"time\":\"<time>\",\"temperature\":\"<temperature>C\"}", "post");
 
     if (send(fd, message, strlen(message), 0) < 0)
     {
@@ -60,17 +55,20 @@ void client_initialize()
         return;
     }
 
-    char* msg = tcp_read(fd, 1024);
+    char* server_read_data = tcp_read(fd, 1024);
 
-    if (msg == NULL)
+    if (server_read_data == NULL)
     {
         printf("TCP_READ FAILED!\n");
         close(fd);
         return;
     }
 
-    printf("%s\n", msg);
+    printf("%s\n", server_read_data);
 
-    free(msg);
+    free(server_read_data);
+    free(message);
+    server_read_data = NULL;
+    message = NULL;
     close(fd);
 }
